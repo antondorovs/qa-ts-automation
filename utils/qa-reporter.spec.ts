@@ -1338,6 +1338,7 @@ test.describe('@utils @contract QA run intelligence', () => {
       unrecoveredRetryRate: 100,
       maximumAttempts: 3,
       retryAttempts: 3,
+      averageRetryAttempts: 1.5,
       minimumDurationMs: 100,
       averageDurationMs: 100,
       maximumDurationMs: 100,
@@ -1351,6 +1352,7 @@ test.describe('@utils @contract QA run intelligence', () => {
       unrecoveredRetryRate: 100,
       maximumAttempts: 3,
       retryAttempts: 3,
+      averageRetryAttempts: 1.5,
       minimumDurationMs: 100,
       averageDurationMs: 100,
       maximumDurationMs: 100,
@@ -1358,7 +1360,7 @@ test.describe('@utils @contract QA run intelligence', () => {
     });
     expect(report.retriedTests).toEqual(retriedTests);
     expect(markdown).toContain('## Retried Test Summary');
-    expect(markdown).toContain('| 2 | 0 | 0% | 2 | 100% | 3 | 3 | 100ms | 100ms | 100ms | 200ms |');
+    expect(markdown).toContain('| 2 | 0 | 0% | 2 | 100% | 3 | 3 | 1.5 | 100ms | 100ms | 100ms | 200ms |');
     expect(markdown).toContain('## Retried Tests');
     expect(markdown).toContain('| failed payment | utils/qa-reporter.spec.ts | 3 | failed | 100ms |');
     expect(markdown).toContain('| flaky checkout | utils/qa-reporter.spec.ts | 2 | flaky | 100ms |');

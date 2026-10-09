@@ -189,6 +189,7 @@ export type RetriedTestSummary = {
   unrecoveredRetryRate: number;
   maximumAttempts: number;
   retryAttempts: number;
+  averageRetryAttempts: number;
   minimumDurationMs: number;
   averageDurationMs: number;
   maximumDurationMs: number;
@@ -911,6 +912,10 @@ export function summarizeRetriedTests(retriedTests: RetriedTest[]): RetriedTestS
   const totalDurationMs = retriedTests.reduce((total, test) => total + test.durationMs, 0);
   const recoveredAfterRetry = retriedTests.filter((test) => test.status === STATUS.PASSED).length;
   const unrecoveredRetries = retriedTests.length - recoveredAfterRetry;
+  const retryAttempts = retriedTests.reduce(
+    (total, test) => total + Math.max(0, test.attempts - 1),
+    0,
+  );
 
   return {
     total: retriedTests.length,
@@ -923,7 +928,10 @@ export function summarizeRetriedTests(retriedTests: RetriedTest[]): RetriedTestS
       ? percentage(unrecoveredRetries, retriedTests.length)
       : 0,
     maximumAttempts: Math.max(0, ...retriedTests.map((test) => test.attempts)),
-    retryAttempts: retriedTests.reduce((total, test) => total + Math.max(0, test.attempts - 1), 0),
+    retryAttempts,
+    averageRetryAttempts: retriedTests.length
+      ? Number((retryAttempts / retriedTests.length).toFixed(2))
+      : 0,
     minimumDurationMs: retriedTests.length
       ? Math.min(...retriedTests.map((test) => test.durationMs))
       : 0,
