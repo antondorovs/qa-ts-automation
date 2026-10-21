@@ -6,6 +6,7 @@ Structure:
 - auth.api.spec.ts -> authorization tests
 - users.api.spec.ts -> users endpoint tests
 - users.contract.spec.ts -> contract and negative scenario checks
+- request-body.contract.spec.ts -> invalid JSON rejection and data integrity checks
 - clients/ -> reusable API clients
 - fixtures/ -> Playwright fixtures that start the local API and create request clients
 - mock/ -> deterministic TypeScript HTTP server and test data
@@ -15,6 +16,11 @@ Structure:
 - utils/ -> helper functions
 
 Core API tests use the local mock server and are safe to run without internet access. Public JSONPlaceholder and Reqres checks run only when `RUN_LIVE_API_TESTS=true`.
+
+POST endpoints return `400` for malformed JSON and JSON values that are not objects,
+with a JSON `error` message. Rejected requests leave users, posts, and comments
+unchanged, and the server continues accepting requests. Unexpected server errors
+still return `500`.
 
 Main goals:
 - API automation practice

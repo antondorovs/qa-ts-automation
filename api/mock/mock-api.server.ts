@@ -15,6 +15,8 @@ import {
 
 type JsonObject = Record<string, unknown>;
 
+class InvalidRequestBodyError extends Error {}
+
 export class MockApiServer {
   private server: Server | undefined;
   private users: UserRecord[] = [];
@@ -142,7 +144,7 @@ export class MockApiServer {
 
       return sendJson(response, 404, { error: 'Resource not found' });
     } catch (error) {
-      return sendJson(response, 500, {
+      return sendJson(response, error instanceof InvalidRequestBodyError ? 400 : 500, {
         error: error instanceof Error ? error.message : 'Unexpected mock server error',
       });
     }
@@ -160,9 +162,17 @@ async function readJson(request: IncomingMessage): Promise<JsonObject> {
     return {};
   }
 
-  const parsed: unknown = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      throw new InvalidRequestBodyError('Request body must contain valid JSON');
+    }
+    throw error;
+  }
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new Error('JSON request body must be an object');
+    throw new InvalidRequestBodyError('JSON request body must be an object');
   }
 
   return parsed as JsonObject;
