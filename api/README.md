@@ -22,6 +22,10 @@ with a JSON `error` message. Rejected requests leave users, posts, and comments
 unchanged, and the server continues accepting requests. Unexpected server errors
 still return `500`.
 
+`assertJsonContentType` checks the `application/json` media type without regard
+to case and allows parameters such as `charset=utf-8`. Similar names such as
+`application/jsonp` and matches inside parameter values do not pass this check.
+
 Main goals:
 - API automation practice
 - response validation

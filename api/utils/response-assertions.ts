@@ -34,8 +34,9 @@ export function assertHeader(response: ApiLikeResponse, headerName: string): str
 
 export function assertJsonContentType(response: ApiLikeResponse): void {
   const contentType = assertHeader(response, 'content-type');
+  const mediaType = contentType.split(';', 1)[0].trim().toLowerCase();
 
-  if (!contentType.includes('application/json')) {
+  if (mediaType !== 'application/json') {
     throw new Error(`Expected JSON response, got "${contentType}"`);
   }
 }

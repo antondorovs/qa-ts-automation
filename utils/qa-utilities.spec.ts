@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { assertEmailField, assertHeader, buildAssertionResult, normalizeHeaders } from '../api/utils/response-assertions';
+import { assertEmailField, assertHeader, assertJsonContentType, buildAssertionResult, normalizeHeaders } from '../api/utils/response-assertions';
 import { isClientError, isServerError, isSuccessStatus } from '../api/utils/status-code-helper';
 import { buildApiBugFromFailure, renderMarkdown } from './bug-report-builder';
 import { STATUS, type QaTestResult } from './qa-metrics';
@@ -43,6 +43,39 @@ test.describe('@utils @contract TypeScript QA utilities', () => {
       name: 'email shape',
       status: 'failed',
     });
+  });
+
+  test('JSON content type assertion should accept media types with case and parameters', () => {
+    for (const contentType of [
+      'application/json',
+      'application/json; charset=utf-8',
+      'APPLICATION/JSON',
+      'Application/Json; Charset=UTF-8',
+      ' application/json ; charset=utf-8',
+    ]) {
+      expect(() => assertJsonContentType({
+        status: 200,
+        headers: { 'Content-Type': contentType },
+      }), contentType).not.toThrow();
+    }
+  });
+
+  test('JSON content type assertion should reject lookalikes and parameter matches', () => {
+    for (const contentType of [
+      'application/jsonp',
+      'application/json+xml',
+      'text/application/json',
+      'text/html; note=application/json',
+      'text/plain',
+    ]) {
+      expect(() => assertJsonContentType({
+        status: 200,
+        headers: { 'content-type': contentType },
+      }), contentType).toThrow('Expected JSON response');
+    }
+
+    expect(() => assertJsonContentType({ status: 200 }))
+      .toThrow('Expected response header "content-type" to be present');
   });
 
   test('status helpers should classify HTTP status code ranges', () => {
