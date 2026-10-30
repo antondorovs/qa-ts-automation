@@ -30,6 +30,10 @@ to case and allows parameters such as `charset=utf-8`. Similar names such as
 negative infinity fail validation. Pagination and problem-details shape checks
 use the same rule for their numeric fields; numeric strings are not coerced.
 
+Required-field assertions check the response object's own properties. Inherited
+properties do not satisfy required fields; own values of `0`, `false`, and `""`
+remain present, while `null` and `undefined` are treated as missing.
+
 Main goals:
 - API automation practice
 - response validation

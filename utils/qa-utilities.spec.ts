@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import {
+  assertBodyContainsFields,
   assertEmailField,
   assertHeader,
   assertJsonContentType,
@@ -85,6 +86,29 @@ test.describe('@utils @contract TypeScript QA utilities', () => {
 
     expect(() => assertJsonContentType({ status: 200 }))
       .toThrow('Expected response header "content-type" to be present');
+  });
+
+  test('required response fields should reject properties inherited from Object.prototype', () => {
+    expect(() => assertBodyContainsFields({}, ['constructor', 'toString', '__proto__']))
+      .toThrow('Missing required fields: constructor, toString, __proto__');
+  });
+
+  test('required response fields should reject inherited numeric values', () => {
+    const body = Object.create({ id: 7 });
+
+    expect(() => assertNumberField(body, 'id')).toThrow('Missing required fields: id');
+  });
+
+  test('required response fields should accept own falsy values and prototype-like keys', () => {
+    const body = JSON.parse('{"count":0,"enabled":false,"label":"","constructor":"value","toString":"value","__proto__":"value"}');
+    expect(() => assertBodyContainsFields(body, [
+      'count', 'enabled', 'label', 'constructor', 'toString', '__proto__',
+    ])).not.toThrow();
+
+    const withoutPrototype = Object.assign(Object.create(null), { id: 0 });
+    expect(() => assertNumberField(withoutPrototype, 'id')).not.toThrow();
+    expect(() => assertBodyContainsFields({ first: null, second: undefined }, ['first', 'second']))
+      .toThrow('Missing required fields: first, second');
   });
 
   test('numeric response fields should accept finite values without coercion', () => {

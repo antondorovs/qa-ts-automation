@@ -42,7 +42,9 @@ export function assertJsonContentType(response: ApiLikeResponse): void {
 }
 
 export function assertBodyContainsFields(body: JsonObject, fields: string[]): void {
-  const missingFields = fields.filter((field) => body[field] === undefined || body[field] === null);
+  const missingFields = fields.filter((field) => (
+    !Object.hasOwn(body, field) || body[field] === undefined || body[field] === null
+  ));
 
   if (missingFields.length > 0) {
     throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
