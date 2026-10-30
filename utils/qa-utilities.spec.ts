@@ -1,5 +1,14 @@
 import { test, expect } from '@playwright/test';
-import { assertEmailField, assertHeader, assertJsonContentType, buildAssertionResult, normalizeHeaders } from '../api/utils/response-assertions';
+import {
+  assertEmailField,
+  assertHeader,
+  assertJsonContentType,
+  assertNumberField,
+  assertPaginationShape,
+  assertProblemDetails,
+  buildAssertionResult,
+  normalizeHeaders,
+} from '../api/utils/response-assertions';
 import { isClientError, isServerError, isSuccessStatus } from '../api/utils/status-code-helper';
 import { buildApiBugFromFailure, renderMarkdown } from './bug-report-builder';
 import { STATUS, type QaTestResult } from './qa-metrics';
@@ -76,6 +85,34 @@ test.describe('@utils @contract TypeScript QA utilities', () => {
 
     expect(() => assertJsonContentType({ status: 200 }))
       .toThrow('Expected response header "content-type" to be present');
+  });
+
+  test('numeric response fields should accept finite values without coercion', () => {
+    for (const value of [0, -1, 1.5, Number.MIN_VALUE, Number.MAX_VALUE]) {
+      expect(() => assertNumberField({ value }, 'value')).not.toThrow();
+    }
+    for (const value of ['1', true, {}, []]) {
+      expect(() => assertNumberField({ value }, 'value')).toThrow('Expected "value" to be a number');
+    }
+    expect(() => assertNumberField({}, 'value')).toThrow('Missing required fields: value');
+    expect(() => assertNumberField({ value: null }, 'value')).toThrow('Missing required fields: value');
+  });
+
+  test('numeric response fields should reject non-finite values', () => {
+    for (const value of [NaN, Infinity, -Infinity]) {
+      expect(() => assertNumberField({ value }, 'value')).toThrow('Expected "value" to be finite');
+    }
+  });
+
+  test('response shape assertions should reject non-finite pagination and problem fields', () => {
+    for (const field of ['page', 'limit', 'total']) {
+      expect(() => assertPaginationShape({ page: 1, limit: 10, total: 0, items: [], [field]: NaN }))
+        .toThrow(`Expected "${field}" to be finite`);
+    }
+    expect(() => assertProblemDetails({ title: 'Bad request', status: Infinity }))
+      .toThrow('Expected "status" to be finite');
+    expect(() => assertPaginationShape({ page: 1, limit: 10, total: 0, items: [] })).not.toThrow();
+    expect(() => assertProblemDetails({ title: 'Bad request', status: 400 })).not.toThrow();
   });
 
   test('status helpers should classify HTTP status code ranges', () => {

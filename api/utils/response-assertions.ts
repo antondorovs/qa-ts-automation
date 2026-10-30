@@ -67,6 +67,10 @@ export function assertNumberField(body: JsonObject, fieldName: string): void {
   if (typeof body[fieldName] !== 'number') {
     throw new Error(`Expected "${fieldName}" to be a number`);
   }
+
+  if (!Number.isFinite(body[fieldName])) {
+    throw new Error(`Expected "${fieldName}" to be finite`);
+  }
 }
 
 export function assertEmailField(body: JsonObject, fieldName = 'email'): void {

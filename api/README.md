@@ -26,6 +26,10 @@ still return `500`.
 to case and allows parameters such as `charset=utf-8`. Similar names such as
 `application/jsonp` and matches inside parameter values do not pass this check.
 
+`assertNumberField` requires a finite numeric value: `NaN` and positive or
+negative infinity fail validation. Pagination and problem-details shape checks
+use the same rule for their numeric fields; numeric strings are not coerced.
+
 Main goals:
 - API automation practice
 - response validation
