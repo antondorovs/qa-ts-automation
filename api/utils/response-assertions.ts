@@ -25,7 +25,7 @@ export function assertHeader(response: ApiLikeResponse, headerName: string): str
   const normalizedName = headerName.toLowerCase();
   const headers = normalizeHeaders(response.headers || {});
 
-  if (!headers[normalizedName]) {
+  if (!Object.hasOwn(headers, normalizedName) || !headers[normalizedName]) {
     throw new Error(`Expected response header "${headerName}" to be present`);
   }
 
@@ -103,10 +103,10 @@ export function assertProblemDetails(body: JsonObject): void {
 }
 
 export function normalizeHeaders(headers: Record<string, HeaderValue>): Record<string, string> {
-  return Object.entries(headers).reduce<Record<string, string>>((accumulator, [name, value]) => {
-    accumulator[name.toLowerCase()] = Array.isArray(value) ? value.join(', ') : String(value);
-    return accumulator;
-  }, {});
+  return Object.fromEntries(Object.entries(headers).map(([name, value]) => [
+    name.toLowerCase(),
+    Array.isArray(value) ? value.join(', ') : String(value),
+  ]));
 }
 
 export function buildAssertionResult(name: string, callback: () => void): AssertionResult {

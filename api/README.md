@@ -34,6 +34,10 @@ Required-field assertions check the response object's own properties. Inherited
 properties do not satisfy required fields; own values of `0`, `false`, and `""`
 remain present, while `null` and `undefined` are treated as missing.
 
+Header normalization preserves names such as `__proto__` as ordinary own keys.
+`assertHeader` accepts only headers present in the normalized map, so inherited
+names such as `constructor` cannot satisfy a missing-header check.
+
 Main goals:
 - API automation practice
 - response validation

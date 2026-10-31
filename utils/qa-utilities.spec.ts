@@ -55,6 +55,36 @@ test.describe('@utils @contract TypeScript QA utilities', () => {
     });
   });
 
+  test('header assertions should reject missing prototype-named headers', () => {
+    for (const headerName of ['constructor', '__proto__']) {
+      expect(() => assertHeader({ status: 200, headers: {} }, headerName))
+        .toThrow(`Expected response header "${headerName}" to be present`);
+      expect(() => assertHeader({ status: 200 }, headerName))
+        .toThrow(`Expected response header "${headerName}" to be present`);
+    }
+  });
+
+  test('header normalization should preserve own prototype-like names', () => {
+    const headers = JSON.parse('{"__proto__":"trace-value","Constructor":"custom-value"}');
+    const normalized = normalizeHeaders(headers);
+
+    expect(Object.hasOwn(normalized, '__proto__')).toBe(true);
+    expect(Object.getPrototypeOf(normalized)).toBe(Object.prototype);
+    expect(assertHeader({ status: 200, headers }, '__proto__')).toBe('trace-value');
+    expect(assertHeader({ status: 200, headers }, 'CONSTRUCTOR')).toBe('custom-value');
+  });
+
+  test('header normalization should preserve numeric and boolean values', () => {
+    const headers = { 'X-Count': 0, 'X-Flag': false, 'X-Ids': [1, 2], 'X-Flags': [false, true] };
+    expect(normalizeHeaders(headers)).toEqual({
+      'x-count': '0', 'x-flag': 'false', 'x-ids': '1, 2', 'x-flags': 'false, true',
+    });
+    expect(assertHeader({ status: 200, headers }, 'x-count')).toBe('0');
+    expect(assertHeader({ status: 200, headers }, 'x-flag')).toBe('false');
+    expect(() => assertHeader({ status: 200, headers: { Empty: '' } }, 'empty'))
+      .toThrow('Expected response header "empty" to be present');
+  });
+
   test('JSON content type assertion should accept media types with case and parameters', () => {
     for (const contentType of [
       'application/json',
