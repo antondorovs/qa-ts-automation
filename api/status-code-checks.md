@@ -58,6 +58,11 @@ Example checks:
 
 ## QA Notes
 
+The status helpers classify only integer codes: `200`–`299` for success,
+`400`–`499` for client errors, and `500`–`599` for server errors.
+Fractional values such as `200.5`, `NaN`, and infinities return `false` from
+all three helpers rather than being mistaken for valid HTTP status codes.
+
 Status code validation should always be combined with:
 - response body validation
 - database validation

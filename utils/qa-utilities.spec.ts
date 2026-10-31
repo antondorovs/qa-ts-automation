@@ -170,10 +170,24 @@ test.describe('@utils @contract TypeScript QA utilities', () => {
   });
 
   test('status helpers should classify HTTP status code ranges', () => {
-    expect(isSuccessStatus(204)).toBe(true);
-    expect(isClientError(404)).toBe(true);
-    expect(isServerError(503)).toBe(true);
-    expect(isSuccessStatus(500)).toBe(false);
+    for (const { classify, first, last } of [
+      { classify: isSuccessStatus, first: 200, last: 299 },
+      { classify: isClientError, first: 400, last: 499 },
+      { classify: isServerError, first: 500, last: 599 },
+    ]) {
+      expect(classify(first - 1)).toBe(false);
+      expect(classify(first)).toBe(true);
+      expect(classify(last)).toBe(true);
+      expect(classify(last + 1)).toBe(false);
+    }
+  });
+
+  test('status helpers should reject fractional and non-finite status codes', () => {
+    for (const statusCode of [200.5, 299.5, 400.5, 499.5, 500.5, 599.5, NaN, Infinity, -Infinity]) {
+      expect(isSuccessStatus(statusCode), `success: ${statusCode}`).toBe(false);
+      expect(isClientError(statusCode), `client error: ${statusCode}`).toBe(false);
+      expect(isServerError(statusCode), `server error: ${statusCode}`).toBe(false);
+    }
   });
 
   test('bug report builder should render API failures as markdown', () => {
