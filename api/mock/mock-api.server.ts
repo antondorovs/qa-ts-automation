@@ -15,7 +15,7 @@ import {
 
 type JsonObject = Record<string, unknown>;
 
-class InvalidRequestBodyError extends Error {}
+class InvalidRequestError extends Error {}
 
 export class MockApiServer {
   private server: Server | undefined;
@@ -85,7 +85,7 @@ export class MockApiServer {
       }
 
       if (method === 'GET' && url.pathname === '/posts') {
-        const userId = parseOptionalNumber(url.searchParams.get('userId'));
+        const userId = parseOptionalId(url.searchParams.get('userId'), 'userId');
         const posts = userId === undefined ? this.posts : this.posts.filter((post) => post.userId === userId);
         return sendJson(response, 200, posts);
       }
@@ -105,7 +105,7 @@ export class MockApiServer {
       }
 
       if (method === 'GET' && url.pathname === '/comments') {
-        const postId = parseOptionalNumber(url.searchParams.get('postId'));
+        const postId = parseOptionalId(url.searchParams.get('postId'), 'postId');
         const comments = postId === undefined
           ? this.comments
           : this.comments.filter((comment) => comment.postId === postId);
@@ -144,7 +144,7 @@ export class MockApiServer {
 
       return sendJson(response, 404, { error: 'Resource not found' });
     } catch (error) {
-      return sendJson(response, error instanceof InvalidRequestBodyError ? 400 : 500, {
+      return sendJson(response, error instanceof InvalidRequestError ? 400 : 500, {
         error: error instanceof Error ? error.message : 'Unexpected mock server error',
       });
     }
@@ -167,12 +167,12 @@ async function readJson(request: IncomingMessage): Promise<JsonObject> {
     parsed = JSON.parse(Buffer.concat(chunks).toString('utf8'));
   } catch (error) {
     if (error instanceof SyntaxError) {
-      throw new InvalidRequestBodyError('Request body must contain valid JSON');
+      throw new InvalidRequestError('Request body must contain valid JSON');
     }
     throw error;
   }
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new InvalidRequestBodyError('JSON request body must be an object');
+    throw new InvalidRequestError('JSON request body must be an object');
   }
 
   return parsed as JsonObject;
@@ -182,13 +182,17 @@ function hasStringFields(body: JsonObject, fields: string[]): boolean {
   return fields.every((field) => typeof body[field] === 'string' && String(body[field]).trim().length > 0);
 }
 
-function parseOptionalNumber(value: string | null): number | undefined {
+function parseOptionalId(value: string | null, parameter: string): number | undefined {
   if (value === null) {
     return undefined;
   }
 
   const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : undefined;
+  if (!/^\d+$/.test(value) || !Number.isSafeInteger(parsed) || parsed <= 0) {
+    throw new InvalidRequestError(`${parameter} must be a positive safe integer`);
+  }
+
+  return parsed;
 }
 
 function sendJson(response: ServerResponse, status: number, body: unknown): void {

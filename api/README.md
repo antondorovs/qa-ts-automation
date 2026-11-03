@@ -7,6 +7,7 @@ Structure:
 - users.api.spec.ts -> users endpoint tests
 - users.contract.spec.ts -> contract and negative scenario checks
 - request-body.contract.spec.ts -> invalid JSON rejection and data integrity checks
+- query-parameters.contract.spec.ts -> filter validation and optional query contracts
 - clients/ -> reusable API clients
 - fixtures/ -> Playwright fixtures that start the local API and create request clients
 - mock/ -> deterministic TypeScript HTTP server and test data
@@ -21,6 +22,11 @@ POST endpoints return `400` for malformed JSON and JSON values that are not obje
 with a JSON `error` message. Rejected requests leave users, posts, and comments
 unchanged, and the server continues accepting requests. Unexpected server errors
 still return `500`.
+
+The optional `userId` filter on `GET /posts` and `postId` filter on `GET /comments`
+must contain decimal digits representing a positive safe integer. Invalid values
+return `400` with a JSON error instead of silently returning an unfiltered list.
+Omitting a filter returns the full collection; a valid unmatched ID returns `[]`.
 
 `assertJsonContentType` checks the `application/json` media type without regard
 to case and allows parameters such as `charset=utf-8`. Similar names such as
