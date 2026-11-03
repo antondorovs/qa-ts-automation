@@ -162,9 +162,19 @@ async function readJson(request: IncomingMessage): Promise<JsonObject> {
     return {};
   }
 
+  let text: string;
+  try {
+    text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(Buffer.concat(chunks));
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new InvalidRequestError('Request body must contain valid UTF-8');
+    }
+    throw error;
+  }
+
   let parsed: unknown;
   try {
-    parsed = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    parsed = JSON.parse(text);
   } catch (error) {
     if (error instanceof SyntaxError) {
       throw new InvalidRequestError('Request body must contain valid JSON');

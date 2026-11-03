@@ -7,6 +7,7 @@ Structure:
 - users.api.spec.ts -> users endpoint tests
 - users.contract.spec.ts -> contract and negative scenario checks
 - request-body.contract.spec.ts -> invalid JSON rejection and data integrity checks
+- request-encoding.contract.spec.ts -> strict UTF-8 decoding and Unicode preservation
 - query-parameters.contract.spec.ts -> filter validation and optional query contracts
 - related-identifiers.contract.spec.ts -> numeric relation IDs and rejected-create data integrity
 - clients/ -> reusable API clients
@@ -23,6 +24,11 @@ POST endpoints return `400` for malformed JSON and JSON values that are not obje
 with a JSON `error` message. Rejected requests leave users, posts, and comments
 unchanged, and the server continues accepting requests. Unexpected server errors
 still return `500`.
+
+JSON request bodies must contain valid UTF-8. Invalid byte sequences return `400`
+before parsing or inserting records, rather than being replaced with corrupted
+text. Valid Unicode, including Cyrillic, emoji, and an explicitly encoded U+FFFD
+replacement character, is preserved.
 
 The optional `userId` filter on `GET /posts` and `postId` filter on `GET /comments`
 must contain decimal digits representing a positive safe integer. Invalid values
