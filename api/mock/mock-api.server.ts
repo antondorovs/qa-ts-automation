@@ -92,8 +92,8 @@ export class MockApiServer {
 
       if (method === 'POST' && url.pathname === '/posts') {
         const body = await readJson(request);
-        if (!hasStringFields(body, ['title', 'body']) || typeof body.userId !== 'number') {
-          return sendJson(response, 400, { error: 'title, body and numeric userId are required' });
+        if (!hasStringFields(body, ['title', 'body']) || !isPositiveSafeInteger(body.userId)) {
+          return sendJson(response, 400, { error: 'title, body and positive safe integer userId are required' });
         }
 
         const post: PostRecord = {
@@ -115,10 +115,10 @@ export class MockApiServer {
       if (method === 'POST' && url.pathname === '/comments') {
         const body = await readJson(request);
         if (
-          typeof body.postId !== 'number'
+          !isPositiveSafeInteger(body.postId)
           || !hasStringFields(body, ['name', 'email', 'body'])
         ) {
-          return sendJson(response, 400, { error: 'postId, name, email and body are required' });
+          return sendJson(response, 400, { error: 'positive safe integer postId, name, email and body are required' });
         }
 
         const comment: CommentRecord = {
@@ -182,13 +182,17 @@ function hasStringFields(body: JsonObject, fields: string[]): boolean {
   return fields.every((field) => typeof body[field] === 'string' && String(body[field]).trim().length > 0);
 }
 
+function isPositiveSafeInteger(value: unknown): value is number {
+  return typeof value === 'number' && Number.isSafeInteger(value) && value > 0;
+}
+
 function parseOptionalId(value: string | null, parameter: string): number | undefined {
   if (value === null) {
     return undefined;
   }
 
   const parsed = Number(value);
-  if (!/^\d+$/.test(value) || !Number.isSafeInteger(parsed) || parsed <= 0) {
+  if (!/^\d+$/.test(value) || !isPositiveSafeInteger(parsed)) {
     throw new InvalidRequestError(`${parameter} must be a positive safe integer`);
   }
 
