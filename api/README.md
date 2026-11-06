@@ -10,6 +10,7 @@ Structure:
 - request-encoding.contract.spec.ts -> strict UTF-8 decoding and Unicode preservation
 - query-parameters.contract.spec.ts -> filter validation and optional query contracts
 - related-identifiers.contract.spec.ts -> numeric relation IDs and rejected-create data integrity
+- required-text.contract.spec.ts -> required string validation and rejected-create data integrity
 - clients/ -> reusable API clients
 - fixtures/ -> Playwright fixtures that start the local API and create request clients
 - mock/ -> deterministic TypeScript HTTP server and test data
@@ -38,6 +39,10 @@ Omitting a filter returns the full collection; a valid unmatched ID returns `[]`
 Creating posts and comments also requires positive safe integer `userId` and
 `postId` values respectively. Zero, negative, fractional, unsafe, and nonnumeric
 values return `400` without adding a record; valid IDs remain filterable by GET.
+
+Required text fields on user, post, and comment creation must be nonblank strings.
+Omitted, null, whitespace-only, and non-string values return `400` without adding
+records. Accepted text keeps its original whitespace and Unicode content.
 
 `assertJsonContentType` checks the `application/json` media type without regard
 to case and allows parameters such as `charset=utf-8`. Similar names such as
