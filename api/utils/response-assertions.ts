@@ -87,6 +87,7 @@ export function assertPaginationShape(body: JsonObject): void {
   assertNumberField(body, 'page');
   assertNumberField(body, 'limit');
   assertNumberField(body, 'total');
+  assertBodyContainsFields(body, ['items']);
 
   if (!Array.isArray(body.items)) {
     throw new Error('Expected "items" to be an array');

@@ -169,6 +169,27 @@ test.describe('@utils @contract TypeScript QA utilities', () => {
     expect(() => assertProblemDetails({ title: 'Bad request', status: 400 })).not.toThrow();
   });
 
+  test('pagination shape should reject inherited or missing items arrays', () => {
+    const metadata = { page: 1, limit: 10, total: 0 };
+    const inheritedItems = Object.assign(Object.create({ items: [] }), metadata);
+    for (const body of [inheritedItems, metadata, { ...metadata, items: null }, { ...metadata, items: undefined }]) {
+      expect(() => assertPaginationShape(body)).toThrow('Missing required fields: items');
+    }
+  });
+
+  test('pagination shape should accept own arrays and reject own non-array values', () => {
+    const metadata = { page: 1, limit: 10, total: 1 };
+    for (const items of [[], [{ id: 1 }]]) {
+      expect(() => assertPaginationShape({ ...metadata, items })).not.toThrow();
+      const withoutPrototype = Object.assign(Object.create(null), metadata, { items });
+      expect(() => assertPaginationShape(withoutPrototype)).not.toThrow();
+    }
+    for (const items of [{}, '[]', 0, false]) {
+      const body = Object.assign(Object.create({ items: [] }), metadata, { items });
+      expect(() => assertPaginationShape(body)).toThrow('Expected "items" to be an array');
+    }
+  });
+
   test('status helpers should classify HTTP status code ranges', () => {
     for (const { classify, first, last } of [
       { classify: isSuccessStatus, first: 200, last: 299 },

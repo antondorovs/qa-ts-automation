@@ -50,6 +50,9 @@ use the same rule for their numeric fields; numeric strings are not coerced.
 Required-field assertions check the response object's own properties. Inherited
 properties do not satisfy required fields; own values of `0`, `false`, and `""`
 remain present, while `null` and `undefined` are treated as missing.
+The required `items` array in `assertPaginationShape` follows the same own-property
+rule: a prototype's array cannot satisfy a missing response field. Own empty and
+nonempty arrays remain valid, including on objects without a prototype.
 
 Header normalization preserves names such as `__proto__` as ordinary own keys.
 `assertHeader` accepts only headers present in the normalized map, so inherited
