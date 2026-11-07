@@ -18,6 +18,17 @@ for (const { endpoint, parameter } of [
     }
   });
 
+  test(`@api @contract GET ${endpoint} rejects repeated ${parameter} filters`, async ({ request, mockApiServer }) => {
+    for (const second of ['1', '2', 'invalid']) {
+      const response = await request.get(
+        `${mockApiServer.baseUrl}${endpoint}?${parameter}=1&${parameter}=${second}`,
+      );
+
+      expect(response.status()).toBe(400);
+      expect(await response.json()).toEqual({ error: `${parameter} must appear at most once` });
+    }
+  });
+
   test(`@api @contract GET ${endpoint} preserves omitted and valid ${parameter} filters`, async ({ request, mockApiServer }) => {
     const response = await request.get(`${mockApiServer.baseUrl}${endpoint}`);
     expect(response.status()).toBe(200);

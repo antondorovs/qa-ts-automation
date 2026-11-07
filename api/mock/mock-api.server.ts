@@ -85,7 +85,7 @@ export class MockApiServer {
       }
 
       if (method === 'GET' && url.pathname === '/posts') {
-        const userId = parseOptionalId(url.searchParams.get('userId'), 'userId');
+        const userId = parseOptionalId(url.searchParams, 'userId');
         const posts = userId === undefined ? this.posts : this.posts.filter((post) => post.userId === userId);
         return sendJson(response, 200, posts);
       }
@@ -105,7 +105,7 @@ export class MockApiServer {
       }
 
       if (method === 'GET' && url.pathname === '/comments') {
-        const postId = parseOptionalId(url.searchParams.get('postId'), 'postId');
+        const postId = parseOptionalId(url.searchParams, 'postId');
         const comments = postId === undefined
           ? this.comments
           : this.comments.filter((comment) => comment.postId === postId);
@@ -196,8 +196,14 @@ function isPositiveSafeInteger(value: unknown): value is number {
   return typeof value === 'number' && Number.isSafeInteger(value) && value > 0;
 }
 
-function parseOptionalId(value: string | null, parameter: string): number | undefined {
-  if (value === null) {
+function parseOptionalId(params: URLSearchParams, parameter: string): number | undefined {
+  const values = params.getAll(parameter);
+  if (values.length > 1) {
+    throw new InvalidRequestError(`${parameter} must appear at most once`);
+  }
+
+  const [value] = values;
+  if (value === undefined) {
     return undefined;
   }
 
