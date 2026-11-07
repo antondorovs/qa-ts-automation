@@ -112,8 +112,10 @@ function renderList(title: string, items: string[], ordered = false): string {
 }
 
 export function buildApiBugFromFailure(failure: ApiFailureInput): BugReport {
+  const method = failure.method || 'GET';
+
   return buildBugReport({
-    title: `${failure.method || 'REQUEST'} ${failure.endpoint} returns unexpected response`,
+    title: `${method} ${failure.endpoint} returns unexpected response`,
     severity: failure.status >= 500 ? 'high' : 'medium',
     priority: failure.status >= 500 ? 'high' : 'normal',
     area: 'api',
@@ -123,7 +125,7 @@ export function buildApiBugFromFailure(failure: ApiFailureInput): BugReport {
       `Test user role is ${failure.role || 'not specified'}`,
     ],
     stepsToReproduce: [
-      `Send ${failure.method || 'GET'} request to ${failure.endpoint}`,
+      `Send ${method} request to ${failure.endpoint}`,
       'Check response status code',
       'Validate response body contract',
     ],

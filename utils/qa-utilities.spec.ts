@@ -222,6 +222,8 @@ test.describe('@utils @contract TypeScript QA utilities', () => {
     });
 
     expect(report.severity).toBe('high');
+    expect(report.title).toBe('GET /users/1 returns unexpected response');
+    expect(report.stepsToReproduce[0]).toBe('Send GET request to /users/1');
     expect(report.labels).toContain('area:api');
     expect(renderMarkdown(report)).toContain('## Steps to reproduce');
   });
