@@ -98,7 +98,7 @@ export function assertProblemDetails(body: JsonObject): void {
   assertStringField(body, 'title');
   assertNumberField(body, 'status');
 
-  if (body.detail !== undefined && typeof body.detail !== 'string') {
+  if (Object.hasOwn(body, 'detail') && body.detail !== undefined && typeof body.detail !== 'string') {
     throw new Error('Expected optional "detail" to be a string');
   }
 }

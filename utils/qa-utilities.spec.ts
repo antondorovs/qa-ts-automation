@@ -169,6 +169,13 @@ test.describe('@utils @contract TypeScript QA utilities', () => {
     expect(() => assertProblemDetails({ title: 'Bad request', status: 400 })).not.toThrow();
   });
 
+  test('problem details should validate only the response’s own detail field', () => {
+    const body = Object.assign(Object.create({ detail: 123 }), { title: 'Bad request', status: 400 });
+    expect(() => assertProblemDetails(body)).not.toThrow();
+    expect(() => assertProblemDetails({ ...body, detail: 'Invalid identifier' })).not.toThrow();
+    expect(() => assertProblemDetails({ ...body, detail: 123 })).toThrow('Expected optional "detail" to be a string');
+  });
+
   test('pagination shape should reject inherited or missing items arrays', () => {
     const metadata = { page: 1, limit: 10, total: 0 };
     const inheritedItems = Object.assign(Object.create({ items: [] }), metadata);
