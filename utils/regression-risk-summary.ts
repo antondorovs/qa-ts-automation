@@ -1,4 +1,4 @@
-import { STATUS, isFailureStatus, type QaTestResult } from './qa-metrics';
+import { STATUS, isFailureStatus, isSlowTest, type QaTestResult } from './qa-metrics';
 
 export type RegressionRisk = 'low' | 'medium' | 'high';
 
@@ -98,7 +98,7 @@ export function buildRegressionRiskHotspots(
       ...buildRegressionRiskSummary({
         failed: suiteResults.filter((result) => isFailureStatus(result.status)).length,
         flaky: suiteResults.filter((result) => result.status === STATUS.FLAKY).length,
-        slow: suiteResults.filter((result) => result.durationMs >= slowTestThresholdMs).length,
+        slow: suiteResults.filter((result) => isSlowTest(result, slowTestThresholdMs)).length,
         skipped: suiteResults.filter((result) => result.status === STATUS.SKIPPED).length,
       }),
     }))

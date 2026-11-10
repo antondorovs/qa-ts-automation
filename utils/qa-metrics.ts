@@ -692,9 +692,13 @@ export function summarizeFailedQualityGateChecks(
   };
 }
 
+export function isSlowTest(result: QaTestResult, thresholdMs: number): boolean {
+  return result.status !== STATUS.SKIPPED && result.durationMs >= thresholdMs;
+}
+
 export function findSlowTests(results: QaTestResult[], thresholdMs = 1000): SlowTest[] {
   return results
-    .filter((result) => result.durationMs >= thresholdMs)
+    .filter((result) => isSlowTest(result, thresholdMs))
     .sort((first, second) => second.durationMs - first.durationMs)
     .map(({ id, suite, title, status, durationMs }) => ({
       id,
@@ -1188,7 +1192,7 @@ export function summarizeSuitePerformance(
         suite,
         total: summary.total,
         executed: summary.executed,
-        slowTests: suiteResults.filter((result) => result.durationMs >= slowTestThresholdMs).length,
+        slowTests: suiteResults.filter((result) => isSlowTest(result, slowTestThresholdMs)).length,
         totalDurationMs: summary.totalDurationMs,
         averageDurationMs: summary.averageDurationMs,
         maximumDurationMs: Math.max(0, ...suiteResults.map((result) => result.durationMs)),

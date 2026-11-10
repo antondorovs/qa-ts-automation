@@ -235,6 +235,17 @@ test.describe('@utils @contract TypeScript QA utilities', () => {
     expect(renderMarkdown(report)).toContain('## Steps to reproduce');
   });
 
+  test('duration metrics and risk hotspots should exclude skipped tests from slow counts', () => {
+    const report = buildQaRunReport([
+      createQaResult('executed', 'api', STATUS.PASSED, 1000),
+      createQaResult('skipped', 'api', STATUS.SKIPPED, 0),
+    ], { runStatus: 'passed', durationMs: 1000 }, { slowTestThresholdMs: 0 });
+
+    expect(report.slowTests.map(({ title }) => title)).toEqual(['executed']);
+    expect(report.suitePerformance[0].slowTests).toBe(1);
+    expect(report.riskHotspots[0].signals).toMatchObject({ slow: 1, skipped: 1 });
+  });
+
   test('metrics and regression summaries should expose release risk signals', () => {
     const results: QaTestResult[] = [
       createQaResult('login smoke', 'ui', STATUS.PASSED, 300),
