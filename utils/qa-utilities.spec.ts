@@ -252,6 +252,21 @@ test.describe('@utils @contract TypeScript QA utilities', () => {
     expect(report.riskHotspots[0].signals).toMatchObject({ slow: 1, skipped: 1 });
   });
 
+  test('run summary should count suite names that match object properties', () => {
+    const report = buildQaRunReport([
+      createQaResult('first', 'constructor', STATUS.PASSED, 10),
+      createQaResult('second', 'constructor', STATUS.PASSED, 10),
+      createQaResult('third', '__proto__', STATUS.PASSED, 10),
+      createQaResult('fourth', 'api', STATUS.PASSED, 10),
+    ], { runStatus: 'passed', durationMs: 40 });
+
+    expect(Object.entries(report.summary.suites)).toEqual([
+      ['constructor', 2],
+      ['__proto__', 1],
+      ['api', 1],
+    ]);
+  });
+
   test('metrics and regression summaries should expose release risk signals', () => {
     const results: QaTestResult[] = [
       createQaResult('login smoke', 'ui', STATUS.PASSED, 300),

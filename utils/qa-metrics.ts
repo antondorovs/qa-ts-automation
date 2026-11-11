@@ -1439,11 +1439,12 @@ function countByStatus(results: QaTestResult[], status: QaTestStatus): number {
 }
 
 function countBy<T>(items: T[], keySelector: (item: T) => string): Record<string, number> {
-  return items.reduce<Record<string, number>>((groups, item) => {
+  const groups = new Map<string, number>();
+  for (const item of items) {
     const key = keySelector(item);
-    groups[key] = (groups[key] || 0) + 1;
-    return groups;
-  }, {});
+    groups.set(key, (groups.get(key) ?? 0) + 1);
+  }
+  return Object.fromEntries(groups);
 }
 
 function buildRequiredTagsCheck(results: QaTestResult[], requiredTags: string[]): QualityGateCheck {
