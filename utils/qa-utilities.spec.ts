@@ -235,14 +235,20 @@ test.describe('@utils @contract TypeScript QA utilities', () => {
     expect(renderMarkdown(report)).toContain('## Steps to reproduce');
   });
 
-  test('duration metrics and risk hotspots should exclude skipped tests from slow counts', () => {
+  test('duration metrics should exclude skipped tests from execution timing', () => {
     const report = buildQaRunReport([
       createQaResult('executed', 'api', STATUS.PASSED, 1000),
-      createQaResult('skipped', 'api', STATUS.SKIPPED, 0),
+      createQaResult('skipped', 'api', STATUS.SKIPPED, 2000),
     ], { runStatus: 'passed', durationMs: 1000 }, { slowTestThresholdMs: 0 });
 
     expect(report.slowTests.map(({ title }) => title)).toEqual(['executed']);
-    expect(report.suitePerformance[0].slowTests).toBe(1);
+    expect(report.summary).toMatchObject({ executed: 1, totalDurationMs: 1000, averageDurationMs: 1000 });
+    expect(report.suitePerformance[0]).toMatchObject({
+      slowTests: 1,
+      totalDurationMs: 1000,
+      averageDurationMs: 1000,
+      maximumDurationMs: 1000,
+    });
     expect(report.riskHotspots[0].signals).toMatchObject({ slow: 1, skipped: 1 });
   });
 

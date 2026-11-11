@@ -500,8 +500,9 @@ export function calculateFailureRate(results: QaTestResult[]): number {
 }
 
 export function summarizeRun(results: QaTestResult[]): QaRunSummary {
-  const totalDurationMs = results.reduce((sum, result) => sum + result.durationMs, 0);
-  const executed = results.filter((result) => result.status !== STATUS.SKIPPED).length;
+  const executedResults = results.filter((result) => result.status !== STATUS.SKIPPED);
+  const totalDurationMs = executedResults.reduce((sum, result) => sum + result.durationMs, 0);
+  const executed = executedResults.length;
   const skipped = countByStatus(results, STATUS.SKIPPED);
   const flaky = countByStatus(results, STATUS.FLAKY);
 
@@ -1195,7 +1196,9 @@ export function summarizeSuitePerformance(
         slowTests: suiteResults.filter((result) => isSlowTest(result, slowTestThresholdMs)).length,
         totalDurationMs: summary.totalDurationMs,
         averageDurationMs: summary.averageDurationMs,
-        maximumDurationMs: Math.max(0, ...suiteResults.map((result) => result.durationMs)),
+        maximumDurationMs: suiteResults.reduce((maximum, result) => (
+          result.status === STATUS.SKIPPED ? maximum : Math.max(maximum, result.durationMs)
+        ), 0),
       };
     })
     .sort((first, second) => (
