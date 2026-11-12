@@ -85,6 +85,13 @@ test.describe('@utils @contract TypeScript QA utilities', () => {
       .toThrow('Expected response header "empty" to be present');
   });
 
+  test('header assertions should reject blank values and preserve nonblank values', () => {
+    expect(() => assertHeader({ status: 200, headers: { 'X-Trace': ' \t ' } }, 'x-trace'))
+      .toThrow('Expected response header "x-trace" to be present');
+    expect(assertHeader({ status: 200, headers: { 'X-Trace': ' trace-value ' } }, 'x-trace'))
+      .toBe(' trace-value ');
+  });
+
   test('JSON content type assertion should accept media types with case and parameters', () => {
     for (const contentType of [
       'application/json',

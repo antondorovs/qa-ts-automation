@@ -25,7 +25,7 @@ export function assertHeader(response: ApiLikeResponse, headerName: string): str
   const normalizedName = headerName.toLowerCase();
   const headers = normalizeHeaders(response.headers || {});
 
-  if (!Object.hasOwn(headers, normalizedName) || !headers[normalizedName]) {
+  if (!Object.hasOwn(headers, normalizedName) || !headers[normalizedName].trim()) {
     throw new Error(`Expected response header "${headerName}" to be present`);
   }
 
