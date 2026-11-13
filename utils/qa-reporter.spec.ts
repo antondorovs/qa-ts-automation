@@ -97,6 +97,17 @@ test.describe('@utils @contract QA run intelligence', () => {
     });
   });
 
+  test('Markdown tables keep multiline test titles in a single row', () => {
+    const report = buildQaRunReport([
+      createResult('passing smoke', STATUS.PASSED),
+      createResult('optional | check\r\nsecond line\nthird line\rfourth line', STATUS.SKIPPED),
+    ], { runStatus: 'passed', durationMs: 100 });
+
+    expect(renderQaReportMarkdown(report)).toContain(
+      '| optional \\| check second line third line fourth line |',
+    );
+  });
+
   test('Markdown summary should include failure and flaky rates for executed tests', () => {
     const report = buildQaRunReport([
       createResult('passing smoke', STATUS.PASSED),

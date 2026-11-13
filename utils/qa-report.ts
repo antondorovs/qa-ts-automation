@@ -561,7 +561,7 @@ function formatDuration(durationMs: number): string {
 }
 
 function escapeTable(value: string): string {
-  return value.replace(/\|/g, '\\|');
+  return value.replace(/\r\n|[\r\n]/g, ' ').replace(/\|/g, '\\|');
 }
 
 function firstLine(value: string): string {
