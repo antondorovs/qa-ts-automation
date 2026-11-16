@@ -565,7 +565,7 @@ function escapeTable(value: string): string {
 }
 
 function firstLine(value: string): string {
-  return value.split(/\r?\n/, 1)[0];
+  return value.split(/\r\n|[\r\n]/, 1)[0];
 }
 
 function formatRequiredTags(tags?: string[]): string {

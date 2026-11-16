@@ -120,6 +120,19 @@ test.describe('@utils @contract QA run intelligence', () => {
     expect(renderQaReportMarkdown(report)).toContain('| Required tags | api\\|contract |');
   });
 
+  test('Markdown failure summaries stop at the first error line', () => {
+    const errors = ['first line\rsecond line', 'first line\r\nsecond line', 'first line\nsecond line'];
+    const report = buildQaRunReport(errors.map((error, index) => ({
+      ...createResult(`failure ${index + 1}`, STATUS.FAILED),
+      error,
+    })), { runStatus: 'failed', durationMs: 100 });
+    const failureSection = renderQaReportMarkdown(report).split('## Failures\n')[1];
+
+    expect(failureSection.match(/: first line\n/g)).toHaveLength(errors.length);
+    expect(failureSection).not.toContain('second line');
+    expect(report.failedTests.map(({ error }) => error)).toEqual(errors);
+  });
+
   test('Markdown summary should include failure and flaky rates for executed tests', () => {
     const report = buildQaRunReport([
       createResult('passing smoke', STATUS.PASSED),
