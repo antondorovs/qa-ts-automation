@@ -108,6 +108,18 @@ test.describe('@utils @contract QA run intelligence', () => {
     );
   });
 
+  test('Markdown policy keeps required tags in a single cell', () => {
+    const requiredTag = 'api|contract';
+    const report = buildQaRunReport([
+      { ...createResult('passing contract', STATUS.PASSED), tags: [requiredTag] },
+    ], { runStatus: 'passed', durationMs: 100 }, {
+      qualityGate: { requiredTags: [`@${requiredTag}`] },
+    });
+
+    expect(report.qualityGate.policy.requiredTags).toEqual([`@${requiredTag}`]);
+    expect(renderQaReportMarkdown(report)).toContain('| Required tags | api\\|contract |');
+  });
+
   test('Markdown summary should include failure and flaky rates for executed tests', () => {
     const report = buildQaRunReport([
       createResult('passing smoke', STATUS.PASSED),

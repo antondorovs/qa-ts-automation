@@ -569,7 +569,7 @@ function firstLine(value: string): string {
 }
 
 function formatRequiredTags(tags?: string[]): string {
-  return tags?.length ? tags.map((tag) => tag.replace(/^@/, '')).join(', ') : 'not configured';
+  return tags?.length ? formatTags(tags.map((tag) => tag.replace(/^@/, ''))) : 'not configured';
 }
 
 function formatTags(tags: string[]): string {
