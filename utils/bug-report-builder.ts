@@ -106,7 +106,15 @@ function renderList(title: string, items: string[], ordered = false): string {
     return '';
   }
 
-  const list = items.map((item, index) => (ordered ? `${index + 1}. ${item}` : `- ${item}`)).join('\n');
+  const list = items.map((item, index) => {
+    const marker = ordered ? `${index + 1}. ` : '- ';
+    const indent = ' '.repeat(marker.length);
+    const [firstLine, ...remainingLines] = item.split(/\r\n|[\r\n]/);
+    return [
+      marker + firstLine,
+      ...remainingLines.map((line) => line ? indent + line : ''),
+    ].join('\n');
+  }).join('\n');
 
   return `## ${title}\n${list}`;
 }

@@ -11,7 +11,7 @@ import {
   normalizeHeaders,
 } from '../api/utils/response-assertions';
 import { isClientError, isServerError, isSuccessStatus } from '../api/utils/status-code-helper';
-import { buildApiBugFromFailure, renderMarkdown } from './bug-report-builder';
+import { buildApiBugFromFailure, buildBugReport, renderMarkdown } from './bug-report-builder';
 import { STATUS, type QaTestResult } from './qa-metrics';
 import { buildQaRunReport } from './qa-report';
 import { buildRegressionRiskSummary } from './regression-risk-summary';
@@ -223,6 +223,22 @@ test.describe('@utils @contract TypeScript QA utilities', () => {
       expect(isClientError(statusCode), `client error: ${statusCode}`).toBe(false);
       expect(isServerError(statusCode), `server error: ${statusCode}`).toBe(false);
     }
+  });
+
+  test('bug report Markdown keeps multiline details inside their list items', () => {
+    const steps = ['Open the form\r\n\r\nKeep the draft open', 'Submit the form'];
+    const report = buildBugReport({
+      title: 'Draft fails to submit',
+      expectedResult: 'Draft submits',
+      actualResult: 'Validation fails',
+      stepsToReproduce: steps,
+      evidence: ['Validation error\rField: title'],
+    });
+    const markdown = renderMarkdown(report);
+
+    expect(markdown).toContain('1. Open the form\n\n   Keep the draft open\n2. Submit the form');
+    expect(markdown).toContain('- Validation error\n  Field: title');
+    expect(report.stepsToReproduce).toEqual(steps);
   });
 
   test('bug report builder should render API failures as markdown', () => {
