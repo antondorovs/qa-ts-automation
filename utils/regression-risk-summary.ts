@@ -88,7 +88,12 @@ export function buildRegressionRiskHotspots(
 
   for (const result of results) {
     const suite = result.suite || 'unknown';
-    suites.set(suite, [...(suites.get(suite) || []), result]);
+    let suiteResults = suites.get(suite);
+    if (!suiteResults) {
+      suiteResults = [];
+      suites.set(suite, suiteResults);
+    }
+    suiteResults.push(result);
   }
 
   return [...suites.entries()]
