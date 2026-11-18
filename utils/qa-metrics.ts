@@ -1070,7 +1070,12 @@ export function summarizeTagCoverage(results: QaTestResult[]): QaTagSummary[] {
     const tags = result.tags.length ? [...new Set(result.tags)] : ['untagged'];
 
     for (const tag of tags) {
-      taggedResults.set(tag, [...(taggedResults.get(tag) || []), result]);
+      let tagResults = taggedResults.get(tag);
+      if (!tagResults) {
+        tagResults = [];
+        taggedResults.set(tag, tagResults);
+      }
+      tagResults.push(result);
     }
   }
 
@@ -1115,7 +1120,12 @@ export function summarizeTestAreas(results: QaTestResult[]): QaTestAreaSummary[]
 
   for (const result of results) {
     const area = getTestArea(result.suite);
-    areas.set(area, [...(areas.get(area) || []), result]);
+    let areaResults = areas.get(area);
+    if (!areaResults) {
+      areaResults = [];
+      areas.set(area, areaResults);
+    }
+    areaResults.push(result);
   }
 
   return [...areas.entries()]
@@ -1182,7 +1192,12 @@ export function summarizeSuitePerformance(
 
   for (const result of results) {
     const suite = result.suite || 'unknown';
-    suites.set(suite, [...(suites.get(suite) || []), result]);
+    let suiteResults = suites.get(suite);
+    if (!suiteResults) {
+      suiteResults = [];
+      suites.set(suite, suiteResults);
+    }
+    suiteResults.push(result);
   }
 
   return [...suites.entries()]
@@ -1224,7 +1239,12 @@ export function summarizeSuiteHealth(results: QaTestResult[]): QaSuiteHealth[] {
 
   for (const result of results) {
     const suite = result.suite || 'unknown';
-    suites.set(suite, [...(suites.get(suite) || []), result]);
+    let suiteResults = suites.get(suite);
+    if (!suiteResults) {
+      suiteResults = [];
+      suites.set(suite, suiteResults);
+    }
+    suiteResults.push(result);
   }
 
   return [...suites.entries()]
