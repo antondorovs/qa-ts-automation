@@ -104,10 +104,15 @@ export function assertProblemDetails(body: JsonObject): void {
 }
 
 export function normalizeHeaders(headers: Record<string, HeaderValue>): Record<string, string> {
-  return Object.fromEntries(Object.entries(headers).map(([name, value]) => [
-    name.toLowerCase(),
-    Array.isArray(value) ? value.join(', ') : String(value),
-  ]));
+  const normalized = new Map<string, string>();
+
+  for (const [name, value] of Object.entries(headers)) {
+    const key = name.toLowerCase();
+    const text = Array.isArray(value) ? value.join(', ') : String(value);
+    normalized.set(key, normalized.has(key) ? `${normalized.get(key)}, ${text}` : text);
+  }
+
+  return Object.fromEntries(normalized);
 }
 
 export function buildAssertionResult(name: string, callback: () => void): AssertionResult {

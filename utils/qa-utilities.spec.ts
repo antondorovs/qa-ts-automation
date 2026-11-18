@@ -85,6 +85,17 @@ test.describe('@utils @contract TypeScript QA utilities', () => {
       .toThrow('Expected response header "empty" to be present');
   });
 
+  test('header normalization combines names that differ only in case', () => {
+    const headers = {
+      'X-Trace': 'first',
+      'x-trace': ['second', 'third'],
+      'X-TRACE': 'fourth',
+    };
+
+    expect(normalizeHeaders(headers)).toEqual({ 'x-trace': 'first, second, third, fourth' });
+    expect(assertHeader({ status: 200, headers }, 'x-trace')).toBe('first, second, third, fourth');
+  });
+
   test('header assertions should reject blank values and preserve nonblank values', () => {
     expect(() => assertHeader({ status: 200, headers: { 'X-Trace': ' \t ' } }, 'x-trace'))
       .toThrow('Expected response header "x-trace" to be present');
