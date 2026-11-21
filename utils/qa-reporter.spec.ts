@@ -79,6 +79,24 @@ test.describe('@utils @contract QA run intelligence', () => {
     });
   });
 
+  test('failure summaries handle large result sets without argument overflow', () => {
+    const failures = Array.from({ length: 200_000 }, (_, index) => ({
+      ...createResult(`failure ${index}`, STATUS.FAILED, index % 2 ? 9 : 1),
+      error: 'Contract mismatch',
+    }));
+
+    expect(summarizeFailedTests(failures)).toEqual({
+      total: 200_000,
+      failed: 200_000,
+      timedOut: 0,
+      interrupted: 0,
+      minimumDurationMs: 1,
+      averageDurationMs: 5,
+      maximumDurationMs: 9,
+      totalDurationMs: 1_000_000,
+    });
+  });
+
   test('skipped tests should stay visible without lowering pass rate', () => {
     const results = [
       createResult('passing smoke', STATUS.PASSED),

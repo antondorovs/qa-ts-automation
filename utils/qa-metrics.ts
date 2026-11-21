@@ -840,10 +840,10 @@ export function summarizeFailedTests(failedTests: FailedTest[]): FailedTestSumma
     timedOut: failedTests.filter((test) => test.status === STATUS.TIMED_OUT).length,
     interrupted: failedTests.filter((test) => test.status === STATUS.INTERRUPTED).length,
     minimumDurationMs: failedTests.length
-      ? Math.min(...failedTests.map((test) => test.durationMs))
+      ? failedTests.reduce((minimum, test) => Math.min(minimum, test.durationMs), Infinity)
       : 0,
     averageDurationMs: failedTests.length ? Math.round(totalDurationMs / failedTests.length) : 0,
-    maximumDurationMs: Math.max(0, ...failedTests.map((test) => test.durationMs)),
+    maximumDurationMs: failedTests.reduce((maximum, test) => Math.max(maximum, test.durationMs), 0),
     totalDurationMs,
   };
 }
