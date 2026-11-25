@@ -97,6 +97,24 @@ test.describe('@utils @contract QA run intelligence', () => {
     });
   });
 
+  test('retry summaries handle large result sets without argument overflow', () => {
+    const retried = Array.from({ length: 200_000 }, (_, index) => ({
+      ...createResult(`retry ${index}`, STATUS.PASSED, index % 2 ? 9 : 1),
+      attempts: index % 2 ? 3 : 2,
+    }));
+
+    expect(summarizeRetriedTests(retried)).toMatchObject({
+      total: 200_000,
+      recoveredAfterRetry: 200_000,
+      maximumAttempts: 3,
+      retryAttempts: 300_000,
+      minimumDurationMs: 1,
+      averageDurationMs: 5,
+      maximumDurationMs: 9,
+      totalDurationMs: 1_000_000,
+    });
+  });
+
   test('skipped tests should stay visible without lowering pass rate', () => {
     const results = [
       createResult('passing smoke', STATUS.PASSED),

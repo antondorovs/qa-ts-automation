@@ -932,16 +932,16 @@ export function summarizeRetriedTests(retriedTests: RetriedTest[]): RetriedTestS
     unrecoveredRetryRate: retriedTests.length
       ? percentage(unrecoveredRetries, retriedTests.length)
       : 0,
-    maximumAttempts: Math.max(0, ...retriedTests.map((test) => test.attempts)),
+    maximumAttempts: retriedTests.reduce((maximum, test) => Math.max(maximum, test.attempts), 0),
     retryAttempts,
     averageRetryAttempts: retriedTests.length
       ? Number((retryAttempts / retriedTests.length).toFixed(2))
       : 0,
     minimumDurationMs: retriedTests.length
-      ? Math.min(...retriedTests.map((test) => test.durationMs))
+      ? retriedTests.reduce((minimum, test) => Math.min(minimum, test.durationMs), Infinity)
       : 0,
     averageDurationMs: retriedTests.length ? Math.round(totalDurationMs / retriedTests.length) : 0,
-    maximumDurationMs: Math.max(0, ...retriedTests.map((test) => test.durationMs)),
+    maximumDurationMs: retriedTests.reduce((maximum, test) => Math.max(maximum, test.durationMs), 0),
     totalDurationMs,
   };
 }
