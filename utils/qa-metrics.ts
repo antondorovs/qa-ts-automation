@@ -1019,12 +1019,12 @@ export function summarizeNonPassingExecutedTests(
     flaky: countByStatus(nonPassingExecutedTests, STATUS.FLAKY),
     nonPassingRate: executed ? percentage(nonPassingExecutedTests.length, executed) : 0,
     minimumDurationMs: nonPassingExecutedTests.length
-      ? Math.min(...nonPassingExecutedTests.map((test) => test.durationMs))
+      ? nonPassingExecutedTests.reduce((minimum, test) => Math.min(minimum, test.durationMs), Infinity)
       : 0,
     averageDurationMs: nonPassingExecutedTests.length
       ? Math.round(totalDurationMs / nonPassingExecutedTests.length)
       : 0,
-    maximumDurationMs: Math.max(0, ...nonPassingExecutedTests.map((test) => test.durationMs)),
+    maximumDurationMs: nonPassingExecutedTests.reduce((maximum, test) => Math.max(maximum, test.durationMs), 0),
     totalDurationMs,
   };
 }
@@ -1046,10 +1046,10 @@ export function summarizeReleaseBlockers(results: QaTestResult[]): QaReleaseBloc
     flaky: countByStatus(releaseBlockers, STATUS.FLAKY),
     blockerRate: executed ? percentage(releaseBlockers.length, executed) : 0,
     minimumDurationMs: releaseBlockers.length
-      ? Math.min(...releaseBlockers.map((test) => test.durationMs))
+      ? releaseBlockers.reduce((minimum, test) => Math.min(minimum, test.durationMs), Infinity)
       : 0,
     averageDurationMs: releaseBlockers.length ? Math.round(totalDurationMs / releaseBlockers.length) : 0,
-    maximumDurationMs: Math.max(0, ...releaseBlockers.map((test) => test.durationMs)),
+    maximumDurationMs: releaseBlockers.reduce((maximum, test) => Math.max(maximum, test.durationMs), 0),
     totalDurationMs,
   };
 }

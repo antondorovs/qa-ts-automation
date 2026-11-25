@@ -132,6 +132,26 @@ test.describe('@utils @contract QA run intelligence', () => {
     });
   });
 
+  for (const summary of [
+    { name: 'release blockers', summarize: summarizeReleaseBlockers },
+    { name: 'non-passing execution', summarize: summarizeNonPassingExecutedTests },
+  ]) {
+    test(`${summary.name} summaries handle large result sets without argument overflow`, () => {
+      const results = Array.from({ length: 200_000 }, (_, index) => (
+        createResult(`blocked ${index}`, STATUS.FAILED, index % 2 ? 9 : 1)
+      ));
+
+      expect(summary.summarize(results)).toMatchObject({
+        total: 200_000,
+        failed: 200_000,
+        minimumDurationMs: 1,
+        averageDurationMs: 5,
+        maximumDurationMs: 9,
+        totalDurationMs: 1_000_000,
+      });
+    });
+  }
+
   test('skipped tests should stay visible without lowering pass rate', () => {
     const results = [
       createResult('passing smoke', STATUS.PASSED),
