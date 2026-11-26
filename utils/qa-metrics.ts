@@ -769,7 +769,7 @@ export function summarizeDurationBudgetBreaches(
   const totalBreachDurationMs = breaches.reduce((total, test) => total + test.durationMs, 0);
   const executedDurationMs = executedResults.reduce((total, test) => total + test.durationMs, 0);
   const totalBudgetMs = maximumDurationMs === undefined ? 0 : executed * maximumDurationMs;
-  const maximumBreachDurationMs = Math.max(0, ...breaches.map((test) => test.durationMs));
+  const maximumBreachDurationMs = breaches.reduce((maximum, test) => Math.max(maximum, test.durationMs), 0);
   const overBudgetDurations = maximumDurationMs === undefined
     ? []
     : breaches.map((test) => Math.max(0, test.durationMs - maximumDurationMs));
@@ -777,7 +777,9 @@ export function summarizeDurationBudgetBreaches(
   const maximumOverBudgetMs = maximumDurationMs === undefined
     ? 0
     : Math.max(0, maximumBreachDurationMs - maximumDurationMs);
-  const minimumOverBudgetMs = overBudgetDurations.length ? Math.min(...overBudgetDurations) : 0;
+  const minimumOverBudgetMs = overBudgetDurations.length
+    ? overBudgetDurations.reduce((minimum, durationMs) => Math.min(minimum, durationMs), Infinity)
+    : 0;
   const averageOverBudgetMs = breaches.length ? Math.round(totalOverBudgetMs / breaches.length) : 0;
 
   return {
@@ -790,7 +792,7 @@ export function summarizeDurationBudgetBreaches(
     breachRate: executed ? percentage(breaches.length, executed) : 0,
     thresholdMs: maximumDurationMs,
     minimumDurationMs: breaches.length
-      ? Math.min(...breaches.map((test) => test.durationMs))
+      ? breaches.reduce((minimum, test) => Math.min(minimum, test.durationMs), Infinity)
       : 0,
     averageDurationMs: breaches.length ? Math.round(totalBreachDurationMs / breaches.length) : 0,
     maximumDurationMs: maximumBreachDurationMs,

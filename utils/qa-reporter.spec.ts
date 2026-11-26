@@ -167,6 +167,24 @@ test.describe('@utils @contract QA run intelligence', () => {
     });
   });
 
+  test('duration budget summaries handle large breach sets without argument overflow', () => {
+    const results = Array.from({ length: 200_000 }, (_, index) => (
+      createResult(`over budget ${index}`, STATUS.PASSED, index % 2 ? 3000 : 2000)
+    ));
+
+    expect(summarizeDurationBudgetBreaches(results, 1000)).toMatchObject({
+      executed: 200_000,
+      total: 200_000,
+      minimumDurationMs: 2000,
+      averageDurationMs: 2500,
+      maximumDurationMs: 3000,
+      totalDurationMs: 500_000_000,
+      minimumOverBudgetMs: 1000,
+      maximumOverBudgetMs: 2000,
+      totalOverBudgetMs: 300_000_000,
+    });
+  });
+
   test('skipped tests should stay visible without lowering pass rate', () => {
     const results = [
       createResult('passing smoke', STATUS.PASSED),
