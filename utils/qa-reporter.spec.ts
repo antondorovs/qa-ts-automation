@@ -152,6 +152,21 @@ test.describe('@utils @contract QA run intelligence', () => {
     });
   }
 
+  test('slow summaries handle large result sets without argument overflow', () => {
+    const results = Array.from({ length: 200_000 }, (_, index) => (
+      createResult(`slow ${index}`, STATUS.PASSED, index % 2 ? 3000 : 1000)
+    ));
+
+    expect(summarizeSlowTests(results, 1000)).toMatchObject({
+      total: 200_000,
+      thresholdMs: 1000,
+      minimumDurationMs: 1000,
+      averageDurationMs: 2000,
+      maximumDurationMs: 3000,
+      totalDurationMs: 400_000_000,
+    });
+  });
+
   test('skipped tests should stay visible without lowering pass rate', () => {
     const results = [
       createResult('passing smoke', STATUS.PASSED),

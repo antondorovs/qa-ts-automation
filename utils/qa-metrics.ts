@@ -717,10 +717,10 @@ export function summarizeSlowTests(slowTests: SlowTest[], thresholdMs = 1000): S
     total: slowTests.length,
     thresholdMs,
     minimumDurationMs: slowTests.length
-      ? Math.min(...slowTests.map((test) => test.durationMs))
+      ? slowTests.reduce((minimum, test) => Math.min(minimum, test.durationMs), Infinity)
       : 0,
     averageDurationMs: slowTests.length ? Math.round(totalDurationMs / slowTests.length) : 0,
-    maximumDurationMs: Math.max(0, ...slowTests.map((test) => test.durationMs)),
+    maximumDurationMs: slowTests.reduce((maximum, test) => Math.max(maximum, test.durationMs), 0),
     totalDurationMs,
   };
 }
