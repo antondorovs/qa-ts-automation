@@ -1232,7 +1232,7 @@ export function summarizeSuitePerformanceProfile(
     total: suitePerformance.length,
     slowSuites: suitePerformance.filter((suite) => suite.slowTests > 0).length,
     totalDurationMs: suitePerformance.reduce((total, suite) => total + suite.totalDurationMs, 0),
-    maximumDurationMs: Math.max(0, ...suitePerformance.map((suite) => suite.maximumDurationMs)),
+    maximumDurationMs: suitePerformance.reduce((maximum, suite) => Math.max(maximum, suite.maximumDurationMs), 0),
   };
 }
 

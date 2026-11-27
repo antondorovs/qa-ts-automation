@@ -185,6 +185,25 @@ test.describe('@utils @contract QA run intelligence', () => {
     });
   });
 
+  test('suite performance summaries handle large suite sets without argument overflow', () => {
+    const suites = Array.from({ length: 200_000 }, (_, index) => ({
+      suite: `suite ${index}`,
+      total: 1,
+      executed: 1,
+      slowTests: index % 2,
+      totalDurationMs: index % 2 ? 3000 : 2000,
+      averageDurationMs: index % 2 ? 3000 : 2000,
+      maximumDurationMs: index % 2 ? 3000 : 2000,
+    }));
+
+    expect(summarizeSuitePerformanceProfile(suites)).toEqual({
+      total: 200_000,
+      slowSuites: 100_000,
+      totalDurationMs: 500_000_000,
+      maximumDurationMs: 3000,
+    });
+  });
+
   test('skipped tests should stay visible without lowering pass rate', () => {
     const results = [
       createResult('passing smoke', STATUS.PASSED),
