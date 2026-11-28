@@ -19,7 +19,17 @@ for (const { endpoint, payload } of [
     }));
     const [prefix, suffix] = JSON.stringify(payload).split('MARKER');
 
-    for (const bytes of [[0xc3, 0x28], [0xe2, 0x82], [0xff]]) {
+    const invalidSequences = [
+      [0xc3, 0x28], // Invalid continuation byte.
+      [0xe2, 0x82], // Truncated three-byte sequence.
+      [0xff], // Invalid leading byte.
+      [0xc0, 0xaf], // Overlong two-byte encoding of '/'.
+      [0xe0, 0x80, 0xaf], // Overlong three-byte encoding of '/'.
+      [0xed, 0xa0, 0x80], // UTF-16 surrogate U+D800.
+      [0xf4, 0x90, 0x80, 0x80], // Code point above U+10FFFF.
+    ];
+
+    for (const bytes of invalidSequences) {
       await test.step(`invalid bytes ${Buffer.from(bytes).toString('hex')}`, async () => {
         const response = await request.post(`${mockApiServer.baseUrl}${endpoint}`, {
           headers: { 'content-type': 'application/json' },
